@@ -11,7 +11,7 @@ INT16_MAX = 65536
 # import imageio
 # imageio.plugins.freeimage.download()
 def pfm2np(path):
-    np.asarray(iio.imread(path))
+    return np.asarray(iio.imread(path))
 
 
 def display_pfm(path):
