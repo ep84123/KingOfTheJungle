@@ -2,7 +2,7 @@ import open3d as o3d
 import numpy as np
 from sklearn.cluster import DBSCAN
 
-from perception.blitz.ground_detection import remove_ground
+from KingOfTheJungle.perception.blitz.ground_detection import remove_ground
 
 
 def get_clusters(pts: np.ndarray, eps=1, min_samples=100):
