@@ -44,7 +44,8 @@ def remove_ground(pcd, chunk_size=1, depth=2):
     return o3d.geometry.PointCloud(o3d.utility.Vector3dVector(arr_without_ground))
 
 
-pcd = o3d.io.read_point_cloud("../../data/basic enviroment/blitz/two_trees.ply")
-points = remove_ground(pcd, 1, 2)
-o3d.visualization.draw([pcd])
-o3d.visualization.draw([points])
+if __name__ == "__main__":
+    pcd = o3d.io.read_point_cloud("../../data/basic enviroment/blitz/two_trees.ply")
+    points = remove_ground(pcd, 1, 2)
+    o3d.visualization.draw([pcd])
+    o3d.visualization.draw([points])
