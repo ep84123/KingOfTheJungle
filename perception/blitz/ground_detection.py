@@ -45,7 +45,7 @@ def remove_ground(arr, chunk_size=1, depth=2):
 
 
 if __name__ == "__main__":
-    pcd = o3d.io.read_point_cloud("../../data/basic enviroment/blitz/two_trees.ply")
+    pcd = o3d.io.read_point_cloud("../../data/basic enviroment/blitz/two_trees.ply").points
     pts = remove_ground(pcd, 1, 2)
 
     # all_clusters.append(pcd)

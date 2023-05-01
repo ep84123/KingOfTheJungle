@@ -34,3 +34,6 @@ def get_AABBs(arr):
     groundless = remove_ground(arr)
     clusters = get_clusters(groundless)
     return [c.get_axis_aligned_bounding_box() for c in clusters]
+
+
+print(get_AABBs(o3d.io.read_point_cloud('../../data/basic enviroment/blitz/output.ply').points))
