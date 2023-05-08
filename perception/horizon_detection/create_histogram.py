@@ -5,12 +5,14 @@ import open3d as o3d
 import tools.pfm_tool as pfm_tool
 import time
 
+from perception.horizon_detection.search_windows import binary_find_windows, simple_loss_function
+
 image_path = "../../data/basic enviroment/simulation data/img_ComputerVision_1_2_1679521978574868600.pfm"
 # image_path = "../../data/basic enviroment/blitz/single_tree.pfm"
 
 
 intrinsic_matrix = copy.deepcopy(pfm_tool.DEFAULT_INTRINSIC.intrinsic_matrix)
-# intrinsic_matrix[0, 2], intrinsic_matrix[1, 2] = 450, 350
+intrinsic_matrix[0, 2], intrinsic_matrix[1, 2] = 450, 350
 
 
 phi_min = 0
@@ -123,6 +125,7 @@ def add_leaf_to_histogram(node: o3d.geometry.OctreeNode, node_info: o3d.geometry
     ver, hor = histogram.shape
     if node_info.depth != max_depth:
         return
+    print(len(node.indices),node_info.size)
     x, y, z = node_info.origin
     theta, phi = get_theta_phi(x, y, z)
     angle_range = math.asin((robot_size + node_info.size) / math.sqrt(x * x + y * y + z * z))
@@ -178,10 +181,15 @@ def get_histogram(depth_image: np.ndarray, shape, max_distance=15, octree_depth=
 def main():
     depth_image = pfm_tool.pfm2np(image_path)
     # depth_image = np.concatenate([np.ones((350, 900)) * 4, np.ones((350, 900))], axis=0)
-    depth_image = depth_image[300:500, 300:700]
-    hist = get_histogram(depth_image, (100, 200), 15, octree_depth=8, visualize=True)
-    pfm_tool.display_np(pfm_tool.convert_to_binary(hist, threshhold=15))
-
+    depth_image = depth_image
+    hist = get_histogram(depth_image, (100, 200), 15, octree_depth=7, visualize=True)
+    s_t = time.time()
+    hist = pfm_tool.convert_to_binary(hist, threshhold=10000, true_val=0, false_val=1000000)
+    ind = binary_find_windows(hist, lambda x: simple_loss_function(x) + simple_loss_function(x,(100,100),x_weight=0))
+    f_t = time.time()
+    print(f"find window time: {f_t-s_t}")
+    pfm_tool.display_np(hist)
+    print(ind)
 
 if __name__ == "__main__":
     main()
