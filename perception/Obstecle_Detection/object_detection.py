@@ -12,11 +12,9 @@ def object_image_detection(path: str):
     model = "ssd_mobilenet/ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt"
     # load the MobileNet SSD model trained  on the COCO dataset
     net = cv2.dnn.readNetFromTensorflow(weights, model)
-
     class_names = []
     with open("ssd_mobilenet/coco_names.txt", "r") as f:
         class_names = f.read().strip().split("\n")
-
     # create a blob from the image
     blob = cv2.dnn.blobFromImage(image, 1.0 / 127.5, (320, 320), [127.5, 127.5, 127.5])
     # pass the blog through our network and get the output predictions
@@ -67,5 +65,13 @@ def image_proccess(path: str):
     cv2.destroyAllWindows()
 
 
+def new_image_detection(path: str):
+    wget https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg
+    wget https:// pjreddie.com / media / files / yolov3.weights
+    wget
+    https: // raw.githubusercontent.com / pjreddie / darknet / master / data / coco.names
+
+
 image_proccess("C:\\Users\\TLP-300\\Downloads\\photo_tree_1.jpg")
+object_image_detection("C:\\Users\\TLP-300\\Downloads\\photo_tree_1.jpg")
 
