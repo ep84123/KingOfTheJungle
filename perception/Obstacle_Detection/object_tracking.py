@@ -85,6 +85,7 @@ def multiple_object_tracking(path: str):
 
     color_list, bbox_list = get_bbox_manually(frame)
     for bbox in bbox_list:
+        print(bbox)
         # Add tracker to the multi-object tracker - TODO: Why some tracker aren't working?
         multi_tracker.add(create_tracker(tracker_types[4]), frame, bbox)
 
