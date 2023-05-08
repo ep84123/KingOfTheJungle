@@ -1,12 +1,12 @@
 import cv2
-import numpy
+import numpy as np
 
 
 def detect_edge():
     # Read the original image
-    img = cv2.imread('basic_tree.png')
+    img = cv2.imread("tree_img.jpg")
     # Display original image
-    cv2.imshow('basic_tree.png', img)
+    cv2.imshow("tree_img.jpg", img)
     cv2.waitKey(0)
 
     # Convert to graycsale
@@ -19,17 +19,17 @@ def detect_edge():
     sobely = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=0, dy=1, ksize=5)  # Sobel Edge Detection on the Y axis
     sobelxy = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=1, ksize=5)  # Combined X and Y Sobel Edge Detection
     # Display Sobel Edge Detection Images
-    cv2.imshow('Sobel X', sobelx)
+    # cv2.imshow('Sobel X', sobelx)
     cv2.waitKey(0)
-    cv2.imshow('Sobel Y', sobely)
+    # cv2.imshow('Sobel Y', sobely)
     cv2.waitKey(0)
-    cv2.imshow('Sobel X Y using Sobel() function', sobelxy)
+    # cv2.imshow('Sobel X Y using Sobel() function', sobelxy)
     cv2.waitKey(0)
 
     # Canny Edge Detection
     edges = cv2.Canny(image=img_blur, threshold1=100, threshold2=200)  # Canny Edge Detection
     # Display Canny Edge Detection Image
-    cv2.imshow('Canny Edge Detection', edges)
+    # cv2.imshow('Canny Edge Detection', edges)
     cv2.waitKey(0)
 
     # Finding Contours
@@ -37,6 +37,7 @@ def detect_edge():
     # since findContours alters the image
     contours, hierarchy = cv2.findContours(edges,
                                            cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    cnt1 = contours[0]
     # cv2.imshow('Canny Edges After Contouring', edges)
     cv2.waitKey(0)
 
@@ -44,14 +45,25 @@ def detect_edge():
     # Draw all contours
     # -1 signifies drawing all contours
     cv2.drawContours(img, contours, -1, (0, 255, 0), 3)
-    megred_contours = agglomerative_cluster(contours)
-
-    print("Number of Contours found = " + str(len(megred_contours)))
-    cv2.drawContours(img, megred_contours, -1, (0, 255, 0), 3)
-
+    # megred_contours = agglomerative_cluster(contours)
+    #
+    # print("Number of Contours found = " + str(len(megred_contours)))
+    # cv2.drawContours(img, megred_contours, -1, (0, 255, 0), 3)
     cv2.imshow('Contours', img)
     cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    for cnt in contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        img1 = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cv2.imshow('BBOX straight', img1)
+    cv2.waitKey(0)
+
+    for cnt in contours:
+        rect = cv2.minAreaRect(cnt)
+        box = cv2.boxPoints(rect)
+        box = np.int0(box)
+        img2 = cv2.drawContours(img, [box], 0, (0, 255, 255), 2)
+        cv2.imshow('BBOX not straight', img2)
+    cv2.waitKey(0)
 
     cv2.destroyAllWindows()
 
@@ -69,7 +81,7 @@ def calculate_contour_distance(contour1, contour2):
 
 
 def merge_contours(contour1, contour2):
-    return numpy.concatenate((contour1, contour2), axis=0)
+    return np.concatenate((contour1, contour2), axis=0)
 
 
 def agglomerative_cluster(contours, threshold_distance=40.0):
