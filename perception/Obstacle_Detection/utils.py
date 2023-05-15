@@ -33,12 +33,12 @@ def init_clock():
 
 
 def img_show(name: str, img):
-    cv2.imshow(name, img)
-    cv2.waitKey(0)
+    # cv2.imshow(name, img)
+    # cv2.waitKey(0)
     print(name, ", time passed: ", time.time() - t0)
 
 
-def get_frames(name, path):
+def get_frames(name, path, delta):
     video = open_video(path, 2e4)
     for i in range(200):
         ok, frame = video.read()
@@ -46,5 +46,5 @@ def get_frames(name, path):
             print('Cannot read video file')
             sys.exit()
         path = 'Video_Frames/'
-        if i % 10 == 0:
+        if i % delta == 0:
             cv2.imwrite(os.path.join(path, name + '-' + str(i) + '.jpg'), frame)

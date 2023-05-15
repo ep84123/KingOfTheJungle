@@ -26,12 +26,12 @@ def process_img(img):
     img_show("Low resolution", resized_img)
 
     # Convert to graycsale
-    img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
-    img_show("Grayscale", img)
+    prs_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img_show("Grayscale", prs_img)
 
     # Blur the image for better edge detection
-    img = cv2.GaussianBlur(img, (5, 5), 0)  # play with values
-    img_show("Blur", img)
+    prs_img = cv2.GaussianBlur(prs_img, (7, 7), 0)  # play with values
+    img_show("Blur", prs_img)
 
     # Sobel Edge Detection - only for testing
     # sobelx = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=0, ksize=5)
@@ -41,14 +41,14 @@ def process_img(img):
     # sobelxy = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=1, ksize=5)
     # img_show("Sobel X Y", sobelx)
 
-    return resized_img, img
+    return img, prs_img
 
 
-def detect_edge(path:str):
+def detect_edge(path: str):
     init_clock()  # for runtime test only
 
     # Read the original image
-    img = cv2.imread(path)
+    img = cv2.imread("Screenshot 2023-05-03 142446.png")
     img_show("Raw image", img)
 
     # raw_img, prss_img = process_img(img)

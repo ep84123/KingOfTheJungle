@@ -2,6 +2,7 @@
 import cv2
 import sys
 from utils import get_random_color, open_video, calc_fps, EXIT_KEY
+from vidstab.VidStab import VidStab
 
 tracker_types = ['BOOSTING', 'MIL', 'KCF', 'TLD', 'MEDIANFLOW', 'GOTURN', 'MOSSE', 'CSRT']
 
@@ -75,7 +76,10 @@ def display_tracker(frame, timer):
 def multiple_object_tracking(path: str):
     multi_tracker = cv2.legacy.MultiTracker_create()
     video = open_video(path, 1e4)
+    stabilizer = VidStab()
+    fps = video.get(cv2.CAP_PROP_FPS)
 
+    print("fps: ", fps)
     # Read first frame - for detection
     ok, frame = video.read()
     if not ok:
@@ -94,7 +98,11 @@ def multiple_object_tracking(path: str):
         ok, frame = video.read()
         if not ok:
             break
-
+        stabilized_frame = stabilizer.stabilize_frame(input_frame=frame,
+                                                      smoothing_window=30)
+        if stabilized_frame is None:
+            # There are no more frames available to stabilize
+            break
         # Start timer
         timer = cv2.getTickCount()
 
