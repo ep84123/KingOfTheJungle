@@ -1,8 +1,10 @@
 from random import randint
 import cv2
 import sys
+import time
 
 EXIT_KEY = 27
+t0 = time.time()
 
 
 def get_random_color():
@@ -23,3 +25,13 @@ def open_video(path: str, start_point: int):
 
 def calc_fps(timer):
     return str(int(cv2.getTickFrequency() / (cv2.getTickCount() - timer)))
+
+
+def init_clock():
+    t0 = time.time()
+
+
+def img_show(name: str, img):
+    cv2.imshow(name, img)
+    cv2.waitKey(0)
+    print(name, ", time passed: ", time.time() - t0)
