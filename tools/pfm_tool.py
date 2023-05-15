@@ -53,5 +53,5 @@ def pfm2greyscale(path, depth_trunc=20.0):
     iio.imwrite('grayscale.png', np.array(convert_dtype_to_int16(pfm2np(path), depth_scale), dtype=np.uint16))
 
 
-def convert_to_binary(depth_map ,threshhold):
-    return np.where(depth_map < threshhold, 1 , 0)
+def convert_to_binary(depth_map ,threshhold, false_val = 0, true_val = 1):
+    return np.where(depth_map < threshhold, true_val , false_val)
