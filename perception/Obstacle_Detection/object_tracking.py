@@ -2,7 +2,7 @@
 import cv2
 import sys
 from utils import get_random_color, open_video, calc_fps, EXIT_KEY
-from vidstab.VidStab import VidStab
+# from vidstab.VidStab import VidStab TODO: pip install
 
 tracker_types = ['BOOSTING', 'MIL', 'KCF', 'TLD', 'MEDIANFLOW', 'GOTURN', 'MOSSE', 'CSRT']
 

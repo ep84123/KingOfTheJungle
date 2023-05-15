@@ -48,7 +48,7 @@ def detect_edge(path: str):
     init_clock()  # for runtime test only
 
     # Read the original image
-    img = cv2.imread("Screenshot 2023-05-03 142446.png")
+    img = cv2.imread(path)
     img_show("Raw image", img)
 
     # raw_img, prss_img = process_img(img)
