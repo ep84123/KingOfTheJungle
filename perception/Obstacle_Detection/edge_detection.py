@@ -2,10 +2,6 @@ import cv2
 import numpy as np
 from utils import img_show, init_clock
 
-# new height and width for the image
-IMG_WIDTH = 640
-IMG_HEIGHT = 480
-
 
 # Draw bboxes of contours
 def draw_bboxes(contours, img):
@@ -19,17 +15,13 @@ def draw_bboxes(contours, img):
 
 
 def process_img(img):
-    # Resize the image
-    resized_img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT), interpolation=cv2.INTER_AREA)
-    img_show("Low resolution", resized_img)
-
     # Convert to graycsale
-    img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
-    img_show("Grayscale", img)
+    prs_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img_show("Grayscale", prs_img)
 
     # Blur the image for better edge detection
-    img = cv2.GaussianBlur(img, (5, 5), 0)  # play with values
-    img_show("Blur", img)
+    prs_img = cv2.GaussianBlur(prs_img, (7, 7), 0)  # play with values
+    img_show("Blur", prs_img)
 
     # Sobel Edge Detection - only for testing
     # sobelx = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=0, ksize=5)
@@ -39,20 +31,20 @@ def process_img(img):
     # sobelxy = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=1, ksize=5)
     # img_show("Sobel X Y", sobelx)
 
-    return resized_img, img
+    return img, prs_img
 
 
-def detect_edge(path:str):
+def detect_edge(path: str):
     init_clock()  # for runtime test only
 
     # Read the original image
-    img = cv2.imread("Screenshot 2023-05-03 142446.png")
+    img = cv2.imread("Video_Frames/0457-135.jpg")
     img_show("Raw image", img)
 
     raw_img, prss_img = process_img(img)
 
     # Canny Edge Detection
-    edges = cv2.Canny(image=prss_img, threshold1=100, threshold2=200)  # play with  threshold values
+    edges = cv2.Canny(image=prss_img, threshold1=80, threshold2=200)  # play with  threshold values
     img_show("Canny Edge Detection", edges)
 
     # Finding Contours - Contours is a Python list of all the contours in the image.
@@ -63,14 +55,16 @@ def detect_edge(path:str):
     # Draw all contours
     cv2.drawContours(raw_img, contours, -1, (0, 255, 0), 3)  # -1: draw all, color, thickness
     img_show("Canny after contouring", raw_img)
-
+    cv2.imshow("Canny after contouring", img)
+    cv2.waitKey(0)
     # merged_contours = agglomerative_cluster(contours)
     # print("Number of Contours after merge = " + str(len(merged_contours)))
     # cv2.drawContours(img, merged_contours, -1, (0, 255, 0), 3)
     # img_show('Contours', img)
 
-    draw_bboxes(contours, raw_img)
+    # draw_bboxes(contours, raw_img)
     # cv2.destroyAllWindows()
+
 
 # def calculate_contour_distance(contour1, contour2):
 #     x1, y1, w1, h1 = cv2.boundingRect(contour1)
@@ -114,14 +108,3 @@ def detect_edge(path:str):
 #     return current_contours
 
 
-def substract_frames():
-    root = "Video_Frames/0457"
-    for i in range(100):
-        if i%10 == 0:
-            img1 = cv2.imread(f"{root}-{i}.jpg")
-            for j in range(100):
-                if j%10 == 0:
-                    img2 = cv2.imread(f"{root}-{j}.jpg")
-                    sub_img = cv2.subtract(img1, img2)
-                    cv2.imshow(f"sub {i} and {j} img", sub_img)
-                    cv2.waitKey(0)

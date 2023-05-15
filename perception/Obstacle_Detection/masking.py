@@ -29,12 +29,12 @@ def mask_frames(video, output):
 # Mask video by pre-chosen range, save the result in output file
 def video_masking(path: str, output_filename: str):
     video = open_video(path, start_point=1e4)
-    result = cv2.VideoWriter(output_filename + ".mp4v", cv2.VideoWriter_fourcc(*'XVID'), 20.0, (640, 480))
+    output = cv2.VideoWriter(output_filename + ".mp4v", cv2.VideoWriter_fourcc(*'XVID'), 20.0, (640, 480))
 
-    mask_frames()
+    mask_frames(video=video, output=output)
 
     video.release()
-    result.release()
+    output.release()
     cv2.destroyAllWindows()
 
     print("video saved successfully")
