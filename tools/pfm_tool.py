@@ -7,6 +7,7 @@ import open3d.geometry
 DEFAULT_INTRINSIC = o3d.open3d.camera.PinholeCameraIntrinsic(900, 700, fx=400, fy=400, cx=500, cy=400)
 INT16_MAX = 65536
 
+
 # Make sure to install .pfm plugin for imageio.v3 by first running:
 # import imageio
 # imageio.plugins.freeimage.download()
@@ -18,8 +19,9 @@ def display_pfm(path):
     display_np(pfm2np(path))
 
 
-def display_np(np_arr):
+def display_np(np_arr, title=""):
     plt.imshow(np_arr)
+    plt.title(title)
     plt.show()
 
 
@@ -34,7 +36,7 @@ def convert_dtype_to_int16(image, scaling_factor=1000.0):
 
 # Performs conversion of .pfm file to a pcd object using int16 data type
 def pfm2pcd(path, depth_trunc=20.0, intrinsic=DEFAULT_INTRINSIC):
-    return depth_np2pcd(pfm2np(path),depth_trunc,intrinsic)
+    return depth_np2pcd(pfm2np(path), depth_trunc, intrinsic)
 
 
 # Performs conversion of numpy depth map to a pcd object using int16 data type
@@ -44,8 +46,9 @@ def depth_np2pcd(depth_np, depth_trunc=20.0, intrinsic=DEFAULT_INTRINSIC):
     return o3d.geometry.PointCloud.create_from_depth_image(depth, intrinsic, depth_scale=depth_scale,
                                                            depth_trunc=depth_trunc)
 
+
 def pfm2ply(input_path, output_path, depth_trunc=20.0, intrinsic=DEFAULT_INTRINSIC):
-    o3d.io.write_point_cloud(output_path,pfm2pcd(input_path,depth_trunc,intrinsic))
+    o3d.io.write_point_cloud(output_path, pfm2pcd(input_path, depth_trunc, intrinsic))
 
 
 def pfm2greyscale(path, depth_trunc=20.0):
@@ -53,5 +56,5 @@ def pfm2greyscale(path, depth_trunc=20.0):
     iio.imwrite('grayscale.png', np.array(convert_dtype_to_int16(pfm2np(path), depth_scale), dtype=np.uint16))
 
 
-def convert_to_binary(depth_map ,threshhold, false_val = 0, true_val = 1):
-    return np.where(depth_map < threshhold, true_val , false_val)
+def convert_to_binary(depth_map, threshhold, false_val=0, true_val=1):
+    return np.where(depth_map < threshhold, true_val, false_val)
