@@ -1,3 +1,5 @@
+import os
+
 import cv2
 import numpy as np
 from utils import img_show, init_clock
@@ -46,13 +48,13 @@ def detect_edge(path:str):
     init_clock()  # for runtime test only
 
     # Read the original image
-    img = cv2.imread("Screenshot 2023-05-03 142446.png")
+    img = cv2.imread(path)
     img_show("Raw image", img)
 
-    raw_img, prss_img = process_img(img)
+    # raw_img, prss_img = process_img(img)
 
     # Canny Edge Detection
-    edges = cv2.Canny(image=prss_img, threshold1=100, threshold2=200)  # play with  threshold values
+    edges = cv2.Canny(image=img, threshold1=100, threshold2=200)  # play with  threshold values
     img_show("Canny Edge Detection", edges)
 
     # Finding Contours - Contours is a Python list of all the contours in the image.
@@ -61,15 +63,15 @@ def detect_edge(path:str):
     print("Number of Contours found = " + str(len(contours)))
 
     # Draw all contours
-    cv2.drawContours(raw_img, contours, -1, (0, 255, 0), 3)  # -1: draw all, color, thickness
-    img_show("Canny after contouring", raw_img)
+    cv2.drawContours(img, contours, -1, (0, 255, 0), 3)  # -1: draw all, color, thickness
+    img_show("Canny after contouring", img)
 
     # merged_contours = agglomerative_cluster(contours)
     # print("Number of Contours after merge = " + str(len(merged_contours)))
     # cv2.drawContours(img, merged_contours, -1, (0, 255, 0), 3)
     # img_show('Contours', img)
 
-    draw_bboxes(contours, raw_img)
+    draw_bboxes(contours, img)
     # cv2.destroyAllWindows()
 
 # def calculate_contour_distance(contour1, contour2):
@@ -115,13 +117,24 @@ def detect_edge(path:str):
 
 
 def substract_frames():
-    root = "Video_Frames/0457"
-    for i in range(100):
-        if i%10 == 0:
-            img1 = cv2.imread(f"{root}-{i}.jpg")
-            for j in range(100):
-                if j%10 == 0:
-                    img2 = cv2.imread(f"{root}-{j}.jpg")
-                    sub_img = cv2.subtract(img1, img2)
-                    cv2.imshow(f"sub {i} and {j} img", sub_img)
-                    cv2.waitKey(0)
+    root = "C:\\Users\\TLP-300\\Desktop\\King-Of-The-Jungle\\perception\\Obstacle_Detection\\video_out.mp4v"
+    root1 = "C:\\Users\\TLP-300\\Desktop\\King-Of-The-Jungle\\perception\\Obstacle_Detection"
+    source = cv2.VideoCapture(root)
+
+    for i in range(0, 50):
+        ret, img1 = source.read()
+        ret, img2 = source.read()
+        for j in range(10):
+            ret, img2 = source.read()
+        if i%5 == 0:
+            # img1 = cv2.imread(f"{root}-{i}.jpg")
+            img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+            img1 = cv2.GaussianBlur(img1, (3, 3), 0)
+            # img2 = cv2.imread(f"{root}-{i-2}.jpg")
+            img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+            img2 = cv2.GaussianBlur(img2, (3, 3), 0)
+
+            sub_img = cv2.subtract(img1, img2)
+            cv2.imwrite(os.path.join(root1, "SUB_IMAGE" + '-' + str(i) + '.jpg'), sub_img)
+            cv2.imshow(f"sub {i} and {i-2} img", sub_img)
+            cv2.waitKey(0)

@@ -31,10 +31,11 @@ def smooth(trajectory):
 
 def stabilize():
     # Read input video
-    cap = cv2.VideoCapture("../../data/DJI_0457.MP4")
-    fps = 20
+    cap = cv2.VideoCapture("C:\\Users\\TLP-300\\Desktop\\DJI_0457.MP4")
+
+    fps = cap.get(cv2.CAP_PROP_FPS)
     # Get frame count
-    n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    n_frames = int(int(cap.get(cv2.CAP_PROP_FRAME_COUNT))/10)
 
     # Get width and height of video stream
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -44,7 +45,7 @@ def stabilize():
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
     # Set up output video
-    out = cv2.VideoWriter('video_out.mp4', fourcc, fps, (w, h))
+    out = cv2.VideoWriter('video_out.mp4v', fourcc, fps, (w, h))
 
     # Read first frame
     success, prev = cap.read()
@@ -83,7 +84,7 @@ def stabilize():
         curr_pts = curr_pts[idx]
 
         # Find transformation matrix
-        m = cv2.estimateRigidTransform(prev_pts, curr_pts, fullAffine=False)  # will only work with OpenCV-3 or less
+        m, inliers = cv2.estimateAffine2D(prev_pts, curr_pts)  # will only work with OpenCV-3 or less
 
         # Extract traslation
         dx = m[0, 2]
@@ -98,7 +99,7 @@ def stabilize():
         # Move to next frame
         prev_gray = curr_gray
 
-        print("Frame: " + str(i) + "/" + str(n_frames) + " -  Tracked points : " + str(len(prev_pts)))
+        # print("Frame: " + str(i) + "/" + str(n_frames) + " -  Tracked points : " + str(len(prev_pts)))
         # Compute trajectory using cumulative sum of transformations
         trajectory = np.cumsum(transforms, axis=0)
 
@@ -146,12 +147,14 @@ def stabilize():
 
         # If the image is too big, resize it.
         if frame_out.shape[1] > 1920:
-            frame_out = cv2.resize(frame_out, (frame_out.shape[1] / 2, frame_out.shape[0] / 2));
+            frame_out = cv2.resize(frame_out, (frame_out.shape[1] // 2, frame_out.shape[0] // 2))
 
-        cv2.imshow("Before and After", frame_out)
-        cv2.waitKey(10)
-        out.write(frame_out)
+        # cv2.imshow("Before and After", frame_out)
+        cv2.imshow("Before and After", frame_stabilized)
 
+        cv2.waitKey(0)
+        out.write(frame_stabilized)
+    out.release()
 
 def fix_border(frame):
     s = frame.shape
@@ -159,3 +162,4 @@ def fix_border(frame):
     T = cv2.getRotationMatrix2D((s[1] / 2, s[0] / 2), 0, 1.04)
     frame = cv2.warpAffine(frame, T, (s[1], s[0]))
     return frame
+
