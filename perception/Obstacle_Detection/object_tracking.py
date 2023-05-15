@@ -1,5 +1,4 @@
 #  Object tracking for obstacle detection
-# ----------------- VERSION SINGLE OBJECT ------------------------------
 import cv2
 import sys
 from utils import get_random_color, open_video, calc_fps, EXIT_KEY

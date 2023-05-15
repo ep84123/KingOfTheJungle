@@ -42,7 +42,7 @@ def process_img(img):
     return resized_img, img
 
 
-def detect_edge():
+def detect_edge(path:str):
     init_clock()  # for runtime test only
 
     # Read the original image
@@ -112,3 +112,16 @@ def detect_edge():
 #             break
 #
 #     return current_contours
+
+
+def substract_frames():
+    root = "Video_Frames/0457"
+    for i in range(100):
+        if i%10 == 0:
+            img1 = cv2.imread(f"{root}-{i}.jpg")
+            for j in range(100):
+                if j%10 == 0:
+                    img2 = cv2.imread(f"{root}-{j}.jpg")
+                    sub_img = cv2.subtract(img1, img2)
+                    cv2.imshow(f"sub {i} and {j} img", sub_img)
+                    cv2.waitKey(0)
