@@ -1,15 +1,19 @@
 import copy
 import math
 import os
-
+import glob
 import numpy as np
 import open3d as o3d
 import tools.pfm_tool as pfm_tool
 import time
 
 # image_path = "../../data/basic enviroment/simulation data/img_ComputerVision_1_2_1679521978574868600.pfm"
-image_path = '../../data/complex/img_SimpleFlight_1_2_1679841217449199400.pfm'
+image_paths = []  # ['../../data/complex/img_SimpleFlight_1_2_1679841217449199400.pfm']
+
 # image_path = '../../data/complex/img_SimpleFlight_1_2_1679841217189484200.pfm'
+image_dirs = ['..\\..\\data\\all_data']
+for directory in image_dirs:
+    image_paths += glob.glob(os.path.join(directory, '*.pfm'))
 
 intrinsic_matrix = copy.deepcopy(pfm_tool.DEFAULT_INTRINSIC.intrinsic_matrix)
 intrinsic_matrix[0, 2], intrinsic_matrix[1, 2] = 450, 350
@@ -46,47 +50,6 @@ def find_paths_in_histogram(histogram: np.ndarray, window_height, window_width):
         for j in range(result.shape[1]):
             result[i, j] = histogram[i:i + window_height, j:j + window_width] * window
     return result
-
-
-def pcd_from_np(depth_image, trunk=20):
-    """
-    create a point cloud from a numpy array
-    :param depth_image:
-    :param trunk: the max distance of points in the point cloud from the origin
-    :return:
-    """
-    x = time.time()
-    d = intrinsic_matrix
-    FX_DEPTH, FY_DEPTH = d[0, 0], d[1, 1]
-    CX_DEPTH, CY_DEPTH = d[0, 2], d[1, 2]
-    height, width = depth_image.shape
-    points = []
-    ind = [0, 0]
-
-    # def add_point(depth):
-    #     if depth < trunk:
-    #         ind[1] += 1
-    #         if ind[1] == height:
-    #             ind[0] += 1
-    #             ind[1] = 0
-    #         x_fac = (500 - CX_DEPTH) / FX_DEPTH
-    #         y_fac = (500 - CY_DEPTH) / FY_DEPTH
-    #         z = depth / (math.sqrt(1 + x_fac * x_fac + (y_fac * y_fac)))
-    #         points.append([z * x_fac, -z * y_fac, z])
-    #
-    # np.vectorize(add_point)(depth_image)
-
-    for i in range(height):
-        for j in range(width):
-            if depth_image[i, j] < trunk:
-                x_fac = (j - CX_DEPTH) / FX_DEPTH
-                y_fac = (i - CY_DEPTH) / FY_DEPTH
-                z = depth_image[i, j] / (math.sqrt(1 + x_fac * x_fac + (y_fac * y_fac)))
-                points.append([z * x_fac, -z * y_fac, z])
-    # x = time.time()
-    pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(points))
-    print("slow pcd:", time.time() - x)
-    return pcd
 
 
 def pcd_from_np(depth_image: np.ndarray, max_distance: int):
