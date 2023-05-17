@@ -2,9 +2,6 @@ import copy
 import math
 import os
 import glob
-import subprocess
-
-import matplotlib.pyplot as plt
 import numpy as np
 import open3d as o3d
 from matplotlib.backends.backend_pdf import PdfPages
@@ -20,19 +17,28 @@ image_dirs = ['..\\..\\data\\new_data_900X700']
 for directory in image_dirs:
     image_paths += glob.glob(os.path.join(directory, '*.pfm'))
 
-
-image_res = (900,700)
-fov_degrees = (90,90)
+image_res = (900, 700)
+fov_degrees = (90, 90)
 fov = np.radians(fov_degrees)
-intrinsic_matrix = o3d.open3d.camera.PinholeCameraIntrinsic(image_res[0], image_res[1], fx=image_res[0] / (2 * math.tan(fov[0] / 2)), fy=image_res[1] / (2 * math.tan(fov[1] / 2)), cx=image_res[0]/2, cy=image_res[1]/2).intrinsic_matrix
-
-
+intrinsic_matrix = o3d.open3d.camera.PinholeCameraIntrinsic(image_res[0], image_res[1],
+                                                            fx=image_res[0] / (2 * math.tan(fov[0] / 2)),
+                                                            fy=image_res[1] / (2 * math.tan(fov[1] / 2)),
+                                                            cx=image_res[0] / 2, cy=image_res[1] / 2).intrinsic_matrix
 
 robot_size = 0.3
 
 
 def get_theta_phi(x, y, z):
-    return math.atan(x / z), math.atan(y / math.sqrt(x ** 2 + z ** 2))
+    return np.arctan(x / z), np.arctan(y / np.sqrt(x ** 2 + z ** 2))
+
+
+def get_theta_phi_from_index(i, j):
+    d = intrinsic_matrix
+    FX_DEPTH, FY_DEPTH = d[0, 0], d[1, 1]
+    CX_DEPTH, CY_DEPTH = d[0, 2], d[1, 2]
+    x = (j - CX_DEPTH) / FX_DEPTH
+    y = - (i - CY_DEPTH) / FY_DEPTH
+    return get_theta_phi(x, y, 1)
 
 
 def get_theta_phi_from_point(point):
@@ -78,7 +84,7 @@ def pcd_from_np(depth_image: np.ndarray, max_distance: int):
     Xs = ((image[:, :, 1] - CX_DEPTH) / FX_DEPTH)
     Ys = ((image[:, :, 2] - CY_DEPTH) / FY_DEPTH)
     Z = image[:, :, 0] / np.sqrt(1 + Xs * Xs + Ys * Ys)
-    X = Z * Xs
+    X = -Z * Xs
     Y = -Z * Ys
     points = np.stack((X, Y, Z), axis=2)
     points = points.reshape((points.shape[0] * points.shape[1], 3))
@@ -118,9 +124,9 @@ def add_leaf_to_histogram(node: o3d.geometry.OctreeNode, node_info: o3d.geometry
     dist = math.sqrt(x * x + y * y + z * z)
     angle_range = math.asin(min([(robot_size + node_info.size) / dist, 1]))
     phi_index = math.floor(ver * (phi_max - phi) / (phi_max - phi_min))
-    theta_index = math.floor(hor * (theta - theta_min) / (theta_max - theta_min))
-    ver_index_diff = math.floor(ver * angle_range)
-    hor_index_diff = math.floor(hor * angle_range)
+    theta_index = math.floor(hor * (theta_max - theta) / (theta_max - theta_min))
+    ver_index_diff = math.floor(ver * angle_range / (phi_max - phi_min))
+    hor_index_diff = math.floor(hor * angle_range / (theta_max - theta_min))
     add_in_angle_range(histogram, phi_index, theta_index, ver_index_diff, hor_index_diff,
                        (len(node.indices) * len(node.indices)) * weight_func(dist, max_dist))
 
@@ -145,8 +151,8 @@ def get_histogram(depth_image: np.ndarray, shape, max_distance=15, octree_depth=
     octree.convert_from_point_cloud(pcd, size_expand=0.01)
     es3 = time.time()
     histogram = np.zeros(shape)
-    theta_min, phi_min = get_theta_phi_from_point(get_point_from_image(depth_image.shape[0] - 1, 0, depth_image))
-    theta_max, phi_max = get_theta_phi_from_point(get_point_from_image(0, depth_image.shape[1] - 1, depth_image))
+    theta_min, phi_min = get_theta_phi_from_index(depth_image.shape[0] - 1, 0)
+    theta_max, phi_max = get_theta_phi_from_index(0, depth_image.shape[1] - 1)
 
     es4 = time.time()
     octree.traverse(
@@ -175,7 +181,7 @@ def get_histogram(depth_image: np.ndarray, shape, max_distance=15, octree_depth=
 
 def analize_image(image_path, i, pdf):
     weight_funcs = [cos_weight]  # [base_weight, linear_weight, cos_weight,double_cos_weight]
-    thresholds = [lambda x: 100, lambda x: 1000, lambda x: max(np.percentile(x[x>0], 10),5)]
+    thresholds = [lambda x: 100, lambda x: 1000, lambda x: max(np.percentile(x[x > 0], 10), 5)]
     depth_image = pfm_tool.pfm2np(image_path)
     max_dist = 20
     hist_res = (70, 90)
@@ -191,7 +197,6 @@ def analize_image(image_path, i, pdf):
                                 f"Image {i + 1}, Threshhold: {threshold}, Func: {func.__name__}", pdf=pdf)
 
 
-
 def main():
     with PdfPages("result.pdf") as pdf:
         for i, image_path in enumerate(image_paths[50:100]):
@@ -199,6 +204,7 @@ def main():
 
         # image = np.clip(pfm_tool.pfm2np(image_path),0,20)
         # pfm_tool.display_np(image,f"{i+1}")
+
 
 if __name__ == "__main__":
     main()
