@@ -19,10 +19,14 @@ def display_pfm(path):
     display_np(pfm2np(path))
 
 
-def display_np(np_arr, title=""):
+def display_np(np_arr, title="", pdf= None):
     plt.imshow(np_arr)
     plt.title(title)
-    plt.show()
+    if not pdf:
+        plt.show()
+    else:
+        pdf.savefig()
+        plt.close()
 
 
 def convert_dtype_to_int16(image, scaling_factor=1000.0):
