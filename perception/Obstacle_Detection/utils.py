@@ -5,7 +5,6 @@ import time
 import os
 
 EXIT_KEY = 27
-t0 = time.time()
 
 
 def get_random_color():
@@ -29,10 +28,10 @@ def calc_fps(timer):
 
 
 def init_clock():
-    t0 = time.time()
+    return time.time()
 
 
-def img_show(name: str, img):
+def img_show(name: str, img, t0):
     # cv2.imshow(name, img)
     # cv2.waitKey(0)
     print(name, ", time passed: ", time.time() - t0)

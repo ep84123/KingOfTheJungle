@@ -104,3 +104,7 @@ def get_hsv_threshold():
 
     # destroying all windows
     cv2.destroyAllWindows()
+
+
+def create_mask():
+    return cv2.imread("Video_Frames/SUB_IMAGE-35.jpg")

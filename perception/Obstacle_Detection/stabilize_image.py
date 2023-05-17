@@ -31,7 +31,7 @@ def smooth(trajectory):
 
 def stabilize():
     # Read input video
-    cap = cv2.VideoCapture("C:\\Users\\TLP-300\\Desktop\\DJI_0457.MP4")
+    cap = cv2.VideoCapture("../../Data/DJI_0457.MP4")
 
     fps = cap.get(cv2.CAP_PROP_FPS)
     # Get frame count

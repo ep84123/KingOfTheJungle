@@ -2,7 +2,7 @@
 import cv2
 import sys
 from utils import get_random_color, open_video, calc_fps, EXIT_KEY
-# from vidstab.VidStab import VidStab TODO: pip install
+from vidstab.VidStab import VidStab
 
 tracker_types = ['BOOSTING', 'MIL', 'KCF', 'TLD', 'MEDIANFLOW', 'GOTURN', 'MOSSE', 'CSRT']
 
@@ -41,7 +41,8 @@ def get_bbox_manually(frame):
         color_list.append(get_random_color())
         print("\nPress Esc to begin tracking objects or press " +
               "another key to draw the next bounding box\n")
-
+        if (0, 0, 0, 0) in bbox_list:
+            bbox_list.remove((0, 0, 0, 0))
         # Exit if ESC pressed
         if (cv2.waitKey(0) & 0xff) == EXIT_KEY:
             break
@@ -98,8 +99,7 @@ def multiple_object_tracking(path: str):
         ok, frame = video.read()
         if not ok:
             break
-        stabilized_frame = stabilizer.stabilize_frame(input_frame=frame,
-                                                      smoothing_window=30)
+        stabilized_frame = stabilizer.stabilize_frame(input_frame=frame, smoothing_window=30)
         if stabilized_frame is None:
             # There are no more frames available to stabilize
             break
@@ -118,5 +118,3 @@ def multiple_object_tracking(path: str):
         # Exit if ESC pressed
         if cv2.waitKey(1) & 0xff == EXIT_KEY:
             break
-
-

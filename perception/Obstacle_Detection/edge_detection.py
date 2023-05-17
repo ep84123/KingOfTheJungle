@@ -3,7 +3,7 @@ import os
 import cv2
 import numpy as np
 from utils import img_show, init_clock
-
+from masking import create_mask
 # new height and width for the image
 IMG_WIDTH = 640
 IMG_HEIGHT = 480
@@ -12,26 +12,34 @@ IMG_HEIGHT = 480
 # Draw bboxes of contours
 def draw_bboxes(contours, img):
     for cnt in contours:
-        rect = cv2.minAreaRect(cnt)
-        box = cv2.boxPoints(rect)
-        box = np.int0(box)
-        img2 = cv2.drawContours(img, [box], 0, (0, 255, 255), 2)
-        cv2.imshow('BBOX not straight', img2)
+        print(cv2.contourArea(cnt))
+        if cv2.contourArea(cnt) > 2:
+            rect = cv2.minAreaRect(cnt)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            img2 = cv2.drawContours(img, [box], 0, (0, 255, 255), 2)
+            cv2.imshow('BBOX not straight', img2)
     cv2.waitKey(0)
 
 
-def process_img(img):
+def process_img(img, t0):
     # Resize the image
-    resized_img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT), interpolation=cv2.INTER_AREA)
-    img_show("Low resolution", resized_img)
+    # resized_img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT), interpolation=cv2.INTER_AREA)
+    # img_show("Low resolution", resized_img)
 
     # Convert to graycsale
     prs_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_show("Grayscale", prs_img)
+    img_show("Grayscale", prs_img, t0)
 
     # Blur the image for better edge detection
-    prs_img = cv2.GaussianBlur(prs_img, (7, 7), 0)  # play with values
-    img_show("Blur", prs_img)
+    # img_show("Blur", prs_img)
+    mask = cv2.cvtColor(create_mask(), cv2.COLOR_BGR2GRAY)
+
+    # Bitwise-AND mask and original image
+    prs_img = cv2.bitwise_and(prs_img, prs_img, mask=mask)
+    img_show("Mask image", prs_img, t0)
+    prs_img = cv2.GaussianBlur(prs_img, (3, 3), 0)  # play with values
+    img_show("Blur image", prs_img, t0)
 
     # Sobel Edge Detection - only for testing
     # sobelx = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=0, ksize=5)
@@ -41,21 +49,21 @@ def process_img(img):
     # sobelxy = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=1, ksize=5)
     # img_show("Sobel X Y", sobelx)
 
-    return img, prs_img
+    return prs_img
 
 
 def detect_edge(path: str):
-    init_clock()  # for runtime test only
-
+    t0 = init_clock()  # for runtime test only
+    img_show("str", None, t0)
     # Read the original image
     img = cv2.imread(path)
-    img_show("Raw image", img)
+    img_show("Raw image", img, t0)
 
-    # raw_img, prss_img = process_img(img)
+    prss_img = process_img(img, t0)
 
     # Canny Edge Detection
-    edges = cv2.Canny(image=img, threshold1=100, threshold2=200)  # play with  threshold values
-    img_show("Canny Edge Detection", edges)
+    edges = cv2.Canny(image=prss_img, threshold1=300, threshold2=400)  # play with  threshold values
+    img_show("Canny Edge Detection", edges, t0)
 
     # Finding Contours - Contours is a Python list of all the contours in the image.
     # Each individual contour is a Numpy array of (x,y) coordinates of boundary points of the object.
@@ -63,15 +71,15 @@ def detect_edge(path: str):
     print("Number of Contours found = " + str(len(contours)))
 
     # Draw all contours
-    cv2.drawContours(img, contours, -1, (0, 255, 0), 3)  # -1: draw all, color, thickness
-    img_show("Canny after contouring", img)
+    # cv2.drawContours(img, contours, -1, (0, 255, 0), 3)  # -1: draw all, color, thickness
+    # img_show("Canny after contouring", img)
 
     # merged_contours = agglomerative_cluster(contours)
     # print("Number of Contours after merge = " + str(len(merged_contours)))
     # cv2.drawContours(img, merged_contours, -1, (0, 255, 0), 3)
     # img_show('Contours', img)
 
-    draw_bboxes(contours, img)
+    # draw_bboxes(contours, img)
     # cv2.destroyAllWindows()
 
 # def calculate_contour_distance(contour1, contour2):
@@ -117,8 +125,8 @@ def detect_edge(path: str):
 
 
 def substract_frames():
-    root = "C:\\Users\\TLP-300\\Desktop\\King-Of-The-Jungle\\perception\\Obstacle_Detection\\video_out.mp4v"
-    root1 = "C:\\Users\\TLP-300\\Desktop\\King-Of-The-Jungle\\perception\\Obstacle_Detection"
+    root = "../../data/DJI_0457.MP4"
+    root1 = "Video_Frames"
     source = cv2.VideoCapture(root)
 
     for i in range(0, 50):
