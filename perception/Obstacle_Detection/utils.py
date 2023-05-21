@@ -32,8 +32,8 @@ def init_clock():
 
 
 def img_show(name: str, img, t0):
-    # cv2.imshow(name, img)
-    # cv2.waitKey(0)
+    cv2.imshow(name, img)
+    cv2.waitKey(0)
     print(name, ", time passed: ", time.time() - t0)
 
 

@@ -107,4 +107,4 @@ def get_hsv_threshold():
 
 
 def create_mask():
-    return cv2.imread("Video_Frames/SUB_IMAGE-35.jpg")
+    return cv2.imread("Video_Frames/SUB_IMAGE-40.jpg")
