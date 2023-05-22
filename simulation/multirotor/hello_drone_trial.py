@@ -14,10 +14,12 @@ client = airsim.MultirotorClient()
 client.confirmConnection()
 client.enableApiControl(True)
 
-
 # **************************************
+angle_sum = 0
+
 
 def take_photo():
+    global angle_sum
     airsim.wait_key('Press any key to takeoff')
     print("Taking off...")
     client.armDisarm(True)
@@ -33,11 +35,13 @@ def take_photo():
             arr = airsim.get_pfm_array(response)
             plt.imshow(np.clip(arr, 0, 20))
             plt.show()
+
     time.sleep(2)
     yaw = 45
     pitch = 0
     angle_sum = (angle_sum + yaw) % 360
     fly_to(client, yaw, pitch, angle_sum)
+
 
 ###
 
@@ -62,15 +66,11 @@ def fly_to(client, yaw, pitch, angle_sum):
     client.moveByVelocityBodyFrameAsync(vx, vy, vz, duration, drivetrain=0,
                                         yaw_mode=airsim.YawMode(is_rate=False, yaw_or_rate=angle_sum))
 
+
+take_of()
+
 for i in range(8):
     take_photo()
-
-
-
-
-
-
-
 
 # for loop for full circle
 # **********************************
