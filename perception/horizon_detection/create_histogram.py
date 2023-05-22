@@ -145,7 +145,6 @@ def get_histogram(depth_image: np.ndarray, shape, max_distance=15, octree_depth=
     """
     es1 = time.time()
     pcd = pcd_from_np(depth_image, max_distance)
-    # pcd = pfm_tool.depth_np2pcd(depth_image,max_distance)
     es2 = time.time()
     octree = o3d.geometry.Octree(max_depth=octree_depth)
     octree.convert_from_point_cloud(pcd, size_expand=0.01)
