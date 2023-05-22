@@ -164,7 +164,7 @@ def get_histogram(depth_image: np.ndarray, shape, max_distance=15, octree_depth=
     # print("octree: ", es3 - es2)
     # print("min,max angles", es4 - es3)
     # print("histogram from octree", es5 - es4)
-    # print("total time:", es5 - es1)
+    print("total time:", es5 - es1)
     if visualize:
         pfm_tool.display_np(np.clip(depth_image, 0, max_distance))
         # pfm_tool.display_np(histogram)
@@ -199,7 +199,7 @@ def analize_image(image_path, i, pdf):
 
 def main():
     with PdfPages("result.pdf") as pdf:
-        for i, image_path in enumerate(image_paths[50:100]):
+        for i, image_path in enumerate(image_paths[50:60]):
             analize_image(image_path, i, pdf)
 
         # image = np.clip(pfm_tool.pfm2np(image_path),0,20)
