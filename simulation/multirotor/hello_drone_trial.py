@@ -32,7 +32,6 @@ def take_photo(iteration,pdf=None):
     if response.pixels_as_float:
         print("Type %d, size %d" % (response.image_type, len(response.image_data_float)))
         arr = airsim.get_pfm_array(response)
-
         yaw, pitch = get_direction_from_image(arr, iteration,pdf)
         print(f"{yaw}, {pitch}")
         angle_sum = (angle_sum + yaw) % 360
@@ -44,6 +43,7 @@ def take_of():
     # airsim.wait_key('Press any key to takeoff')
     print("Taking off...")
     client.armDisarm(True)
+    time.sleep(2)
     client.takeoffAsync().join()
 
 
@@ -52,8 +52,8 @@ def take_of():
 # sum - the facing direction in degrees
 def fly_to(client, yaw, pitch, angle_sum):
     # set the drone's velocity vector to turn left at a speed of 5 m/s
-    vx = math.cos(math.radians(yaw))  # forward speed in m/s
-    vy = math.sin(math.radians(yaw))  # lateral speed in m/s
+    vx = math.cos(math.radians(pitch)) * math.cos(math.radians(yaw))  # forward speed in m/s
+    vy = math.cos(math.radians(pitch)) * math.sin(math.radians(yaw))  # lateral speed in m/s
     vz = math.sin(math.radians(pitch))  # vertical speed in m/s
     duration = 4  # duration of movement in seconds
 
@@ -79,9 +79,12 @@ if __name__ == '__main__':
     client.confirmConnection()
     client.enableApiControl(True)
     take_of()
+    start = time.time()
     with PdfPages(f"../mission_reports/mission_report_{datetime.now().strftime('%m_%d_%H%M')}.pdf") as pdf:
-        for i in range(20):
+        for i in range(1000):
             take_photo(i,pdf)
+            if(time.time() - start > 100):
+                break
 
     # that's enough fun for now. let's quit cleanly
     client.enableApiControl(False)

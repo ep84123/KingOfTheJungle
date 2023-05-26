@@ -13,19 +13,19 @@ import time
 image_paths = []  # ['../../data/complex/img_SimpleFlight_1_2_1679841217449199400.pfm']
 
 # image_path = '../../data/complex/img_SimpleFlight_1_2_1679841217189484200.pfm'
-image_dirs = ['..\\..\\data\\new_data_900X700']
+image_dirs = ['..\\..\\data\\new_data_144X256']
 for directory in image_dirs:
     image_paths += glob.glob(os.path.join(directory, '*.pfm'))
 
-image_res = (900, 700)
-fov_degrees = (90, 90)
+image_res = (256, 144)
+fov_degrees = (90, 60)
 fov = np.radians(fov_degrees)
 intrinsic_matrix = o3d.open3d.camera.PinholeCameraIntrinsic(image_res[0], image_res[1],
                                                             fx=image_res[0] / (2 * math.tan(fov[0] / 2)),
                                                             fy=image_res[1] / (2 * math.tan(fov[1] / 2)),
                                                             cx=image_res[0] / 2, cy=image_res[1] / 2).intrinsic_matrix
 
-robot_size = 0.3
+robot_size = 0.65
 
 
 def get_theta_phi(x, y, z):
@@ -163,7 +163,7 @@ def get_histogram(depth_image: np.ndarray, shape, max_distance=15, octree_depth=
     # print("octree: ", es3 - es2)
     # print("min,max angles", es4 - es3)
     # print("histogram from octree", es5 - es4)
-    print("total time:", es5 - es1)
+    # print("total time:", es5 - es1)
     if visualize:
         pfm_tool.display_np(np.clip(depth_image, 0, max_distance))
         # pfm_tool.display_np(histogram)
@@ -183,7 +183,7 @@ def analize_image(image_path, i, pdf):
     thresholds = [lambda x: 100, lambda x: 1000, lambda x: max(np.percentile(x[x > 0], 10), 5)]
     depth_image = pfm_tool.pfm2np(image_path)
     max_dist = 20
-    hist_res = (70, 90)
+    hist_res = (60, 90)
     pfm_tool.display_np(np.clip(depth_image, 0, max_dist), f"Image {i + 1}", pdf=pdf)
     for func in weight_funcs:
         hist = get_histogram(depth_image, hist_res, max_dist, octree_depth=7, visualize=False, weight_func=func)
@@ -198,7 +198,7 @@ def analize_image(image_path, i, pdf):
 
 def main():
     with PdfPages("result.pdf") as pdf:
-        for i, image_path in enumerate(image_paths[50:60]):
+        for i, image_path in enumerate(image_paths[:10]):
             analize_image(image_path, i, pdf)
 
         # image = np.clip(pfm_tool.pfm2np(image_path),0,20)
