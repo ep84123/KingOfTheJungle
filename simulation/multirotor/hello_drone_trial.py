@@ -20,9 +20,12 @@ from perception.horizon_detection.find_direction import get_direction_from_image
 
 # **************************************
 angle_sum = 0
+max_speed = 2
+duration = 4  # duration of movement in seconds
+epsilon = 0.01
 
 
-def take_photo(iteration,pdf=None):
+def take_photo(iteration, pdf=None):
     global angle_sum
     responses = client.simGetImages(
         [airsim.ImageRequest("1", airsim.ImageType.DepthPerspective, True)])  # depth in perspective projection
@@ -32,10 +35,10 @@ def take_photo(iteration,pdf=None):
     if response.pixels_as_float:
         print("Type %d, size %d" % (response.image_type, len(response.image_data_float)))
         arr = airsim.get_pfm_array(response)
-        yaw, pitch = get_direction_from_image(arr, iteration,pdf)
+        yaw, pitch, success_rate = get_direction_from_image(arr, iteration, pdf)
         print(f"{yaw}, {pitch}")
         angle_sum = (angle_sum + yaw) % 360
-        fly_to(client, yaw, pitch, angle_sum)
+        fly_to(client, yaw, pitch, angle_sum, success_rate)
 
 
 # **************************************
@@ -47,15 +50,32 @@ def take_of():
     client.takeoffAsync().join()
 
 
+def stop(success_rate):
+    global angle_sum
+    # if success rate < epsilon it means that the drone have no where to go
+    print("STOPPPPPPPPPPPPPPPP")
+    angle_sum += 45
+    client.moveByVelocityBodyFrameAsync(0, 0, 0, 1, drivetrain=0,
+                                        yaw_mode=airsim.YawMode(is_rate=False, yaw_or_rate=angle_sum))
+
+    time.sleep(0.5)
+
+
 # yaw - the direction to fly in degrees
 # pitch - the height to get in degrees, positive = down
-# sum - the facing direction in degrees
-def fly_to(client, yaw, pitch, angle_sum):
-    # set the drone's velocity vector to turn left at a speed of 5 m/s
+# angle_sum - the facing direction in degrees
+# success_rate - the freedom of flying fast (between 0-1)
+def fly_to(client, yaw, pitch, angle_sum, success_rate):
+    # if success rate < epsilon it means that the drone have no where to go
+    if success_rate < epsilon:
+        stop(success_rate)
+        return    # set the drone's velocity vector to turn left at a speed of 5 m/s
     vx = math.cos(math.radians(pitch)) * math.cos(math.radians(yaw))  # forward speed in m/s
     vy = math.cos(math.radians(pitch)) * math.sin(math.radians(yaw))  # lateral speed in m/s
     vz = math.sin(math.radians(pitch))  # vertical speed in m/s
-    duration = 4  # duration of movement in seconds
+    vx = max_speed * success_rate * vx
+    vy = max_speed * success_rate * vy
+    vz = max_speed * success_rate * vz
 
     client.moveByVelocityBodyFrameAsync(vx, vy, vz, duration, drivetrain=0,
                                         yaw_mode=airsim.YawMode(is_rate=False, yaw_or_rate=angle_sum))

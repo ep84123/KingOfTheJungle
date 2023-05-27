@@ -26,7 +26,9 @@ def get_direction_from_image(image: np.ndarray, iter_num: int, pdf):
     thresh = 200
     binary = pfm_tool.convert_to_binary(hist, thresh, 10 ** 9, 0)
     trunced_hist = np.maximum(binary,hist/thresh) * thresh_loss_sesitivity
-    i, j = binary_find_windows(trunced_hist, go_down_loss,thresh_loss_sesitivity,pdf)
+    i, j, value = binary_find_windows(trunced_hist, go_down_loss,thresh_loss_sesitivity,pdf)
+
+    cfd_level = np.power(np.e,-value/thresh_loss_sesitivity)
     print(f"indexes chosen: {i},{j}")
     theta_min, phi_min = get_theta_phi_from_index(image.shape[0] - 1, 0)
     theta_max, phi_max = get_theta_phi_from_index(0, image.shape[1] - 1)
@@ -36,4 +38,4 @@ def get_direction_from_image(image: np.ndarray, iter_num: int, pdf):
     # pfm_tool.display_np(binary,f"binary hist {iter_num},thresh{thresh}\ntime:{round(ef - es, 2)}", pdf)
     # pfm_tool.display_np(np.clip(trunced_hist, 0, 1.1*thresh_loss_sesitivity),f"binary hist {iter_num},thresh{thresh}\ntime:{round(ef - es, 2)}", pdf)
     print(f"The time iter{iter_num} took is: {ef - es}")
-    return math.degrees(theta_min + j / res[1] * (theta_max - theta_min)), math.degrees(phi_min + (phi_max - phi_min) * i / res[0])
+    return math.degrees(theta_min + j / res[1] * (theta_max - theta_min)), math.degrees(phi_min + (phi_max - phi_min) * i / res[0]), cfd_level

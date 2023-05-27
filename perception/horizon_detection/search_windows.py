@@ -13,7 +13,7 @@ def binary_find_windows(hist: np.ndarray, loss_func,thresh_sens,pdf=None):
     i, j = np.unravel_index(np.argmin(loss_mat, axis=None), res)
     if pdf is not None:
         pfm_tool.display_np(np.clip(loss_mat,0,thresh_sens * 2.2),f"loss matrix:{i},{j}",pdf)
-    return i,j
+    return i,j, loss_mat[i,j]
 
 
 
