@@ -3,6 +3,7 @@ import imageio.v3 as iio
 import matplotlib.pyplot as plt
 import open3d as o3d
 import open3d.geometry
+from matplotlib.backends.backend_pdf import PdfPages
 
 DEFAULT_INTRINSIC = o3d.open3d.camera.PinholeCameraIntrinsic(900, 700, fx=400, fy=400, cx=500, cy=400)
 INT16_MAX = 65536
@@ -20,15 +21,21 @@ def display_pfm(path):
 
 
 def display_np(np_arr, title="", pdf= None):
-    plt.imshow(np_arr)
-    plt.title(title)
-    if not pdf:
+    if pdf is None:
+        plt.imshow(np_arr)
+        plt.title(title)
         plt.show()
     else:
-        pdf.savefig()
-        plt.close()
+        pdf.append((np_arr, title))
 
 
+def display_pdf(pdf_list, filename):
+    with PdfPages(filename) as pdf:
+        for data,title in pdf_list:
+            plt.imshow(data)
+            plt.title(title)
+            pdf.savefig()
+            plt.close()
 def convert_dtype_to_int16(image, scaling_factor=1000.0):
     depth_image = scaling_factor * image
     for i in range(len(depth_image)):

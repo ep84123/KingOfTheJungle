@@ -17,8 +17,8 @@ def go_down_loss(mat):
 def get_direction_from_image(image: np.ndarray, iter_num: int, pdf):
     max_depth = 10
     thresh_loss_sesitivity = 1000
-    pfm_tool.display_np(np.clip(image,0,max_depth),f"frame {iter_num}", pdf)
     es = time.time()
+    pfm_tool.display_np(np.clip(image,0,max_depth),f"frame {iter_num}", pdf)
     res = (60, 90)
     hist = get_histogram(image, res, max_depth,octree_depth=6, weight_func=cos_weight)
     thresh = np.nanpercentile(hist[hist != 0], 10) + 5
@@ -26,10 +26,10 @@ def get_direction_from_image(image: np.ndarray, iter_num: int, pdf):
     thresh = 200
     binary = pfm_tool.convert_to_binary(hist, thresh, 10 ** 9, 0)
     trunced_hist = np.maximum(binary,hist/thresh) * thresh_loss_sesitivity
-    i, j, value = binary_find_windows(trunced_hist, go_down_loss,thresh_loss_sesitivity,pdf)
+    i, j, value = binary_find_windows(trunced_hist, go_down_loss,thresh_loss_sesitivity, pdf)
 
     cfd_level = np.power(np.e,-value/thresh_loss_sesitivity)
-    print(f"indexes chosen: {i},{j}")
+    print(f"indexes chosen: height {i}, width {j}")
     theta_min, phi_min = get_theta_phi_from_index(image.shape[0] - 1, 0)
     theta_max, phi_max = get_theta_phi_from_index(0, image.shape[1] - 1)
     ef = time.time()
