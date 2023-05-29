@@ -65,10 +65,10 @@ def image_proccess(path: str):
     cv2.destroyAllWindows()
 
 
-def new_image_detection(path: str):
-    wget https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg
-    wget https:// pjreddie.com / media / files / yolov3.weights
-    wget https: // raw.githubusercontent.com / pjreddie / darknet / master / data / coco.names
+# def new_image_detection(path: str):
+    # wget https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg
+    # wget https:// pjreddie.com / media / files / yolov3.weights
+    # wget https: // raw.githubusercontent.com / pjreddie / darknet / master / data / coco.names
 
 
 image_proccess("C:\\Users\\TLP-300\\Downloads\\photo_tree_1.jpg")

@@ -1,13 +1,12 @@
 from operator import itemgetter
-
-import numpy as np
 import cv2
+import numpy as np
 import matplotlib.pyplot as plt
 from utils import *
 
 
 def get_imgs():
-    video = open_video("../../data/Untitled video - Made with Clipchamp.mp4", 0)
+    video = open_video("../../data/DJI_0457.MP4", 0)
     ret, img1 = video.read()
     for i in range(5):
         ret, img2 = video.read()
