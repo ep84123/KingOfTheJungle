@@ -2,82 +2,52 @@ from datetime import datetime
 
 import airsim
 import numpy as np
-import os
-import tempfile
-import pprint
-import cv2
 import math
 import time
 from tools.pfm_tool import display_pdf, display_np
 from matplotlib.backends.backend_pdf import PdfPages
-
 import setup_path
 import matplotlib.pyplot as plt
 from perception.horizon_detection.find_direction import get_direction_from_image
 
-# connect to the AirSim simulator.
-
-
-# **************************************
-angle_sum = 0
+# global variables
 max_speed = 2
 duration = 2  # duration of movement in seconds
 epsilon = 0.01
 
 
-def take_photo(iteration, pdf=None):
-    global angle_sum
+# function to get the multirotor current yaw
+def get_yaw():
+    state = client.getMultirotorState()
+    kinematics = state.kinematics_estimated
+    yaw = math.degrees(airsim.utils.to_eularian_angles(kinematics.orientation)[2])
+    return yaw
 
+
+def Iteration(iteration, pdf=None):
     t1 = time.time()
     responses = client.simGetImages(
         [airsim.ImageRequest("1", airsim.ImageType.DepthPerspective, True)])  # depth in perspective projection
-    # print('Retrieved images: %d' % len(responses))
-    state = client.getMultirotorState()
-    kinematics = state.kinematics_estimated
-    roll, prev_pitch, prev_yaw = airsim.utils.to_eularian_angles(kinematics.orientation)
-    prev_yaw = math.degrees(prev_yaw)
-    print(f"real stats: Yaw: {prev_yaw},  Pitch: {math.degrees(prev_pitch)}, angle_sum: {angle_sum}")
+    prev_yaw = get_yaw()
+    print(f"real stats: Yaw: {prev_yaw}")
 
     response = responses[0]
     if response.pixels_as_float:
-        # print("Type %d, size %d" % (response.image_type, len(response.image_data_float)))
         arr = airsim.get_pfm_array(response)
         print(f"response_time: {time.time() - t1}")
-
-
-
+        # getting the desire yaw and pitch and algorithm
         yaw, pitch, success_rate = get_direction_from_image(arr, iteration, pdf)
-        # **************************
-        # Get the drone's kinematics state
-
-        # Extract the orientation angles
-
-        # **************************
-        print(f"algorithem stats: Yaw: {yaw},  Pitch: {pitch}")
-        # time.sleep(0.4)
-        angle_sum = (angle_sum + yaw) % 360
+        print(f"algorithm stats: Yaw: {yaw},  Pitch: {pitch}")
         responses = client.simGetImages(
             [airsim.ImageRequest("1", airsim.ImageType.DepthPerspective, True)])  # depth in perspective projection
         response = responses[0]
         if response.pixels_as_float:
-            # print("Type %d, size %d" % (response.image_type, len(response.image_data_float)))
             arr = airsim.get_pfm_array(response)
             display_np(np.clip(arr, 0, 10), f"image_after_computing{iteration}", pdf_list)
 
-        # # ***********************
-        # # Get the drone's kinematics state
-        # state = client.getMultirotorState()
-        # kinematics = state.kinematics_estimated
-        # # Extract the orientation angles
-        # roll, pitch1, yaw1 = airsim.utils.to_eularian_angles(kinematics.orientation)
-        # print(f"real stats: Yaw: {math.degrees(yaw1)},  Pitch: {math.degrees(pitch1)}, angle_sum{angle_sum}")
-
-        # ***********************
-        # fly_to(client, yaw, pitch, angle_sum, success_rate)
         fly_to(client, yaw, pitch, prev_yaw + yaw, success_rate)
 
 
-# **************************************
 def take_of():
     # airsim.wait_key('Press any key to takeoff')
     print("Taking off...")
@@ -90,14 +60,8 @@ def stop(success_rate):
     global angle_sum
     # if success rate < epsilon it means that the drone have no where to go
     print("STOPPPPPPPPPPPPPPPP")
-    angle_sum += 30
-    state = client.getMultirotorState()
-    kinematics = state.kinematics_estimated
-    roll, prev_pitch, prev_yaw = airsim.utils.to_eularian_angles(kinematics.orientation)
-    prev_yaw = math.degrees(prev_yaw)
-
     client.moveByVelocityBodyFrameAsync(0, 0, 0, 1, drivetrain=0,
-                                        yaw_mode=airsim.YawMode(is_rate=False, yaw_or_rate=prev_yaw + 30))
+                                        yaw_mode=airsim.YawMode(is_rate=False, yaw_or_rate=get_yaw() + 30))
     time.sleep(0.5)
 
 
@@ -111,29 +75,13 @@ def fly_to(client, yaw, pitch, angle_sum, success_rate):
         stop(success_rate)
         return
 
-    vx = math.cos(math.radians(pitch)) * math.cos(math.radians(yaw))  # forward speed in m/s
-    vy = math.cos(math.radians(pitch)) * math.sin(math.radians(yaw))  # lateral speed in m/s
-    vz = math.sin(math.radians(pitch))  # vertical speed in m/s
-    vx = max_speed * success_rate * vx
-    vy = max_speed * success_rate * vy
-    vz = max_speed * success_rate * vz
+    vx = math.cos(math.radians(pitch)) * math.cos(math.radians(yaw)) * max_speed * success_rate  # forward speed in m/s
+    vy = math.cos(math.radians(pitch)) * math.sin(math.radians(yaw)) * max_speed * success_rate  # lateral speed in m/s
+    vz = math.sin(math.radians(pitch)) * max_speed * success_rate  # vertical speed in m/s
     client.moveByVelocityBodyFrameAsync(vx, vy, vz, duration, drivetrain=0,
                                         yaw_mode=airsim.YawMode(is_rate=False, yaw_or_rate=angle_sum))
 
 
-# # for loop for full circle
-# # **********************************
-# airsim.wait_key('press any key to move 2 second')
-# print("moving 2 second")
-#
-# angle_sum = 0
-# for i in range(8):
-#     time.sleep(2)
-#     yaw = 45
-#     pitch = 0
-#     angle_sum = (angle_sum + yaw) % 360
-#     fly_to(client, yaw, pitch, angle_sum)
-# # ***********************************
 if __name__ == '__main__':
     client = airsim.MultirotorClient()
     client.confirmConnection()
@@ -143,7 +91,7 @@ if __name__ == '__main__':
     pdf_list = []
     for i in range(1000):
         print(f"\niter {i}\n")
-        take_photo(i, pdf_list)
+        Iteration(i, pdf_list)
         if (time.time() - start > 60):
             break
     display_pdf(pdf_list, f"../mission_reports/mission_report_{datetime.now().strftime('%m_%d_%H%M')}.pdf")
