@@ -150,9 +150,9 @@ def stabilize():
             frame_out = cv2.resize(frame_out, (frame_out.shape[1] // 2, frame_out.shape[0] // 2))
 
         # cv2.imshow("Before and After", frame_out)
-        cv2.imshow("Before and After", frame_stabilized)
-
-        cv2.waitKey(0)
+        # cv2.imshow("Before and After", frame_stabilized)
+        #
+        # cv2.waitKey(0)
         out.write(frame_stabilized)
     out.release()
 

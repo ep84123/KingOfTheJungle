@@ -3,6 +3,9 @@ import cv2
 import sys
 import time
 import os
+# from pytube import YouTube
+import sys
+
 
 EXIT_KEY = 27
 
@@ -44,6 +47,39 @@ def get_frames(name, path, delta):
         if not ok:
             print('Cannot read video file')
             sys.exit()
-        path = 'Video_Frames/'
+        path = '../../data/Video_Frames/'
         if i % delta == 0:
             cv2.imwrite(os.path.join(path, name + '-' + str(i) + '.jpg'), frame)
+
+
+# def change_vid_res():
+#     video = cv2.VideoCapture(
+#         "Baby_Sensory_-_Color_Animation_#4_-_Spirals_-_Infant_Visual_Stimulation_(Soothe_colic_baby).mp4")
+#     success, image = video.read()
+#     # Declare the variable with value 0
+#     count = 0
+#     fourcc = cv2.VideoWriter_fourcc(*'XVID')
+#     out = cv2.VideoWriter('output.avi', fourcc, 5, (720, 480))
+#     while True:
+#         ret, frame = video.read()
+#         if ret:
+#             b = cv2.resize(frame, (720, 480), fx=0, fy=0, interpolation=cv2.INTER_CUBIC)
+#             out.write(b)
+#         else:
+#             break
+#
+#     video.release()
+#     out.release()
+#     cv2.destroyAllWindows()
+#     print("finish")
+#
+#
+# videoURL = ""
+# if (len(sys.argv) > 1):
+#     videoURL = sys.argv[1]
+# if ("youtube.com" not in videoURL):
+#     videoURL = input("Enter YouTube URL: ")
+# yt = YouTube(videoURL, use_oauth=True, allow_oauth_cache=True)
+# filename = yt.title.replace(" ", "_")
+# print("Downloading YouTube File: " + yt.title)
+# yt.streams.first().download(filename=filename + ".mp4", )
