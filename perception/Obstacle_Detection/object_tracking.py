@@ -3,7 +3,7 @@ import cv2
 import sys
 from utils import get_random_color, open_video, calc_fps, EXIT_KEY
 from vidstab.VidStab import VidStab
-from edge_detection import detect_edge
+from edge_detection import detect_edge_tree
 
 tracker_types = ['BOOSTING', 'MIL', 'KCF', 'TLD', 'MEDIANFLOW', 'GOTURN', 'MOSSE', 'CSRT']
 
@@ -56,7 +56,7 @@ def get_bbox_manually(frame):
 
 def get_bbox_from_detector(frame):
     bbox_list = []
-    contours = detect_edge(frame)
+    contours = detect_edge_tree(frame)
     for c in contours:
         x, y, w, h = cv2.boundingRect(c)
         bbox_list.append((x, y, w, h))

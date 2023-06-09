@@ -1,10 +1,10 @@
 from random import randint
 import cv2
-import sys
 import time
 import os
 # from pytube import YouTube
 import sys
+import glob
 
 
 EXIT_KEY = 27
@@ -42,7 +42,7 @@ def img_show(name: str, img, t0):
 
 def get_frames(name, path, delta):
     video = open_video(path, 2e4)
-    for i in range(200):
+    for i in range(400, 600, 5):
         ok, frame = video.read()
         if not ok:
             print('Cannot read video file')
@@ -83,3 +83,21 @@ def get_frames(name, path, delta):
 # filename = yt.title.replace(" ", "_")
 # print("Downloading YouTube File: " + yt.title)
 # yt.streams.first().download(filename=filename + ".mp4", )
+# import required module
+
+
+
+def create_vid_from_images(name, path):
+    img_array = []
+    size = (1920,1080)
+    for filename in glob.glob(path):
+        img = cv2.imread(filename)
+        height, width, layers = img.shape
+        size = (width, height)
+        img_array.append(img)
+
+    out = cv2.VideoWriter(f'{name}.avi', cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
+
+    for i in range(len(img_array)):
+        out.write(img_array[i])
+    out.release()

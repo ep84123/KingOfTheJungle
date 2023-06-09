@@ -67,8 +67,8 @@ def get_mask_from_trackbars(hsv_image):
     max_red = cv2.getTrackbarPos('max_red', 'Track Bars')
 
     # printing the threshold values for usage in detection application
-    # print(f'min_blue {min_blue}  min_green {min_green} min_red {min_red}')
-    # print(f'max_blue {max_blue}  max_green {max_green} max_red {max_red}')
+    print(f'min_blue {min_blue}  min_green {min_green} min_red {min_red}')
+    print(f'max_blue {max_blue}  max_green {max_green} max_red {max_red}')
 
     # using inrange function to turn on the image pixels where object threshold is matched
     return cv2.inRange(hsv_image, (min_blue, min_green, min_red), (max_blue, max_green, max_red))
@@ -76,13 +76,13 @@ def get_mask_from_trackbars(hsv_image):
 
 
 
-def get_hsv_threshold():
+def get_hsv_threshold(path):
     # creating a resizable window named Track Bars
     cv2.namedWindow('Track Bars', cv2.WINDOW_NORMAL)
     create_trackbars(doNothing)
 
     # reading the image
-    object_image = cv2.imread("Screenshot 2023-05-03 142446.png")
+    object_image = cv2.imread(path)
 
     # resizing the image for viewing purposes
     resized_image = cv2.resize(object_image, (800, 626))
